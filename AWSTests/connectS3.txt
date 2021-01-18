@@ -1,0 +1,68 @@
+I have mentioned the steps to upload an image to s3 bucket using JMeter below:
+
+Requirements:
+
+Java 9
+aws-java-sdk-s3 JAR 1.11.313 dependencies link
+Steps:
+
+Copy the jar files to JMeterHome/lib/ext/ of Jmeter.
+
+Create a Test Plan and click on Thread Group.
+
+Set Number of Threads, Ramp-up period and Loop Count to 1.
+
+Right click on thread groups and add a JSR233 sampler.
+
+Select Java as the language in the JSR233 sampler.
+
+Add the following code in the script section of the sampler.
+
+ import java.io.IOException;
+import java.io.IOException;
+ import java.io.InputStream;
+ import java.util.Properties;
+ import java.util.ArrayList;
+ import java.util.List;
+ import java.util.Scanner;
+ import com.amazonaws.auth.AWSSessionCredentials;
+ import com.amazonaws.auth.AWSStaticCredentialsProvider;
+ import com.amazonaws.auth.BasicAWSCredentials;
+ import com.amazonaws.services.s3.AmazonS3;
+ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+ import com.amazonaws.services.s3.model.AmazonS3Exception;
+ import com.amazonaws.services.s3.model.GetObjectRequest;
+ import com.amazonaws.services.s3.model.PutObjectRequest;
+ import com.amazonaws.services.s3.model.PutObjectResult;
+ import com.amazonaws.services.s3.model.S3Object;
+ import com.amazonaws.services.s3.model.S3ObjectInputStream;
+ import com.amazonaws.regions.Regions;
+ import com.amazonaws.regions.Region;
+ import com.amazonaws.services.s3.model.ObjectMetadata;
+ import com.amazonaws.services.s3.transfer.Download;
+ import com.amazonaws.services.s3.transfer.TransferManager;
+ import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
+ import com.amazonaws.services.s3.transfer.Upload;
+
+ String accessKey = "xxxxxxx";
+ String secretKey = "xxxxxxxxx";               
+ String bucketName = "bucketname"; //specify bucketname
+ String region = "region"; //specify region
+
+ BasicAWSCredentials sessionCredentials = new BasicAWSCredentials(accessKey, secretKey);
+
+ AmazonS3 s3 = AmazonS3ClientBuilder.standard()
+.withRegion(region)
+.withCredentials(new AWSStaticCredentialsProvider(sessionCredentials))
+.build();
+
+ TransferManager xfer_mgr = TransferManagerBuilder.standard()
+.withS3Client(s3)
+            .withDisableParallelDownloads(false)
+            .build();
+
+ File f = new File("xxx/image.jpg"); //specify path to your image 
+ String objectName = "newimage.jpg"; //provide a name for the image how you want your image to be shown i
+ Upload xfer = xfer_mgr.upload(bucketName, objectName, f);   
+ xfer.waitForCompletion();  
+ xfer_mgr.shutdownNow();
